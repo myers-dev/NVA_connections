@@ -9,11 +9,19 @@ resource "azurerm_route_table" "RT" {
   ]
 
   route {
-    name = "default"
-    address_prefix = "0.0.0.0/0"
-    next_hop_type = "VirtualAppliance"
-    next_hop_in_ip_address = module.PA[0].azurerm_network_interface_private_ip_address[1]
+     name                   = "Spoke2Spoke"
+     address_prefix         = "10.0.0.0/8"
+     next_hop_type          = "VirtualAppliance"
+     next_hop_in_ip_address = module.PA[0].azurerm_network_interface_private_ip_address[1]
+     #next_hop_in_ip_address = azurerm_network_interface.linuxrouternic.private_ip_address
   }
+
+  route {
+    name                   = "default"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "Internet"
+  }
+
 }
 
 resource "azurerm_subnet_route_table_association" "RT" {

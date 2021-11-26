@@ -1,12 +1,12 @@
-resource "azurerm_marketplace_agreement" "paloalto" {
-    publisher ="paloaltonetworks"
-    offer     = "vmseries-flex"
-    plan = "bundle2"
-}
+# resource "azurerm_marketplace_agreement" "paloalto" {
+#     publisher ="paloaltonetworks"
+#     offer     = "vmseries-flex"
+#     plan = "bundle2"
+# }
 
 module "PA" {
   source = "../modules/generic_vm"
-  
+
   count = var.pa_scale
 
   resource_group_name = var.resource_group_name
@@ -14,8 +14,8 @@ module "PA" {
 
   name = "PA${count.index}"
 
-  subnet_ids = module.vnet[0].vnet_subnets 
-  
+  subnet_ids = module.vnet[0].vnet_subnets
+
   enable_ip_forwarding = true
 
   public_ip_address_id = azurerm_public_ip.pa-pip[count.index].id
@@ -24,38 +24,38 @@ module "PA" {
 
   zone = count.index % 3 + 1
 
-  # storage_image_reference = {
-  #   publisher = "paloaltonetworks"
-  #   offer = "vmseries-flex"
-  #   sku = "byol"
-  #   version = "latest"
-  # }
-
-  # plan = {
-  #   name = "byol"
-  #   publisher = "paloaltonetworks"
-  #   product = "vmseries-flex"
-  # }
-
-
   storage_image_reference = {
     publisher = "paloaltonetworks"
     offer = "vmseries-flex"
-    sku = "bundle2"
+    sku = "byol"
     version = "latest"
   }
 
   plan = {
-    name = "bundle2"
+    name = "byol"
     publisher = "paloaltonetworks"
     product = "vmseries-flex"
   }
 
 
+  # storage_image_reference = {
+  #   publisher = "paloaltonetworks"
+  #   offer     = "vmseries-flex"
+  #   sku       = "bundle2"
+  #   version   = "latest"
+  # }
+
+  # plan = {
+  #   name      = "bundle2"
+  #   publisher = "paloaltonetworks"
+  #   product   = "vmseries-flex"
+  # }
+
+
   disable_password_authentication = false
-  admin_username = data.azurerm_key_vault_secret.keyvault-username.value
-  admin_password = data.azurerm_key_vault_secret.keyvault-password.value
-  ssh_key_data = data.azurerm_ssh_public_key.sshkey.public_key
+  admin_username                  = data.azurerm_key_vault_secret.keyvault-username.value
+  admin_password                  = data.azurerm_key_vault_secret.keyvault-password.value
+  ssh_key_data                    = data.azurerm_ssh_public_key.sshkey.public_key
 
   # to overcome an error of non-existent RG
   depends_on = [

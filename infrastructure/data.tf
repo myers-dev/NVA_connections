@@ -1,15 +1,15 @@
 locals {
-  kvname = "cs-keystore1"
+  kvname = "cs-keystore"
 }
 
 data "azurerm_key_vault_secret" "keyvault-username" {
-  name                = "adminusername"
-  key_vault_id        = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/CloudShell/providers/Microsoft.KeyVault/vaults/${local.kvname}"
+  name         = "adminusername"
+  key_vault_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/CloudShell/providers/Microsoft.KeyVault/vaults/${local.kvname}"
 }
 
 data "azurerm_key_vault_secret" "keyvault-password" {
-  name                = "adminpassword"
-  key_vault_id        = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/CloudShell/providers/Microsoft.KeyVault/vaults/${local.kvname}"
+  name         = "adminpassword"
+  key_vault_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/CloudShell/providers/Microsoft.KeyVault/vaults/${local.kvname}"
 }
 
 data "azurerm_ssh_public_key" "sshkey" {
@@ -18,8 +18,8 @@ data "azurerm_ssh_public_key" "sshkey" {
 }
 
 data "azurerm_key_vault_secret" "sharedkey" {
-  name                = "sharedkey"
-  key_vault_id        = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/CloudShell/providers/Microsoft.KeyVault/vaults/${local.kvname}"
+  name         = "sharedkey"
+  key_vault_id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/CloudShell/providers/Microsoft.KeyVault/vaults/${local.kvname}"
 }
 
 data "azurerm_subscription" "current" {

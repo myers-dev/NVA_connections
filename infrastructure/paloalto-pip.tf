@@ -15,7 +15,7 @@ resource "azurerm_public_ip" "pa-pip" {
   sku                 = "Standard"
 
   domain_name_label = "paloalto${random_id.id.hex}"
-  
+
   # to overcome an error of non-existent RG
   depends_on = [
     azurerm_resource_group.rg

@@ -27,8 +27,8 @@ variable "lock_level" {
 
 variable "security_group_name" {
   description = "NSG Name"
-  type = string
-  default = "nsg"
+  type        = string
+  default     = "nsg"
 }
 
 variable "custom_rules" {
@@ -40,15 +40,15 @@ variable "custom_rules" {
 
 variable "vnets" {
   description = "List of Vnets names"
-  type        = list(object({
-                  name = string
-                  address_space = list(string)
-                  subnet_names = list(string)
-                  subnet_prefixes = list (string)
-                  enforce_private_link_endpoint_network_policies = map(any)
-                  enforce_private_link_service_network_policies = map(any)
+  type = list(object({
+    name                                           = string
+    address_space                                  = list(string)
+    subnet_names                                   = list(string)
+    subnet_prefixes                                = list(string)
+    enforce_private_link_endpoint_network_policies = map(any)
+    enforce_private_link_service_network_policies  = map(any)
   }))
-  default     = [] 
+  default = []
 }
 
 variable "pa_scale" {
