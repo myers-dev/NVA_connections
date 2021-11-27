@@ -27,7 +27,7 @@ VNET | Function | Address space
 
 So we can inspect the number of flows in the NVA in the hub we will originate flows in VNET1 (client) and terminate them in VNET2 (server). 
 
-![Baseline Topology](supplementals/Topology0.png)
+![Baseline Topology](supplementals/img/Topology0.png)
 
 Topology gets deployed by running *terraform init/plan/apply* in the infrastructure folder. 
 
@@ -97,7 +97,7 @@ sudo usermod -aG docker andrew
 
 We will use wrk as a *deployment* on AKS1 in the following scenario. Wrk will target load balancer in front of NGINX deployed in AKS2. Traffic is routed to VM300 running in the hub and reflected back to the target in Spoke2.
 
-![AKS to AKS via PaloAlto VM300](supplementals/Topology1.png)
+![AKS to AKS via PaloAlto VM300](supplementals/img/Topology1.png)
 
 Getting rg and subnets variables from the *infrastructure* folder
 ```bash
@@ -120,8 +120,7 @@ kubectl config use-context aks1
 ```
 Creating the deployment using wrk ACR image, instead of x.x.x.x use load balancer IP from the next step.
 ```bash
-kubectl create deployment wrk --image=acrcopernic.azurecr.io/wrk:latest --replicas=20 -- bash -c "while true; do  wrk -t12 -c1200 -d3000s http://x.x.x.x:80 ; done "
-kubectl scale --replicas=240 deployment/wrk
+kubectl create deployment wrk --image=acrcopernic.azurecr.io/wrk:latest --replicas=240 -- bash -c "while true; do  wrk -t12 -c1200 -d3000s http://x.x.x.x:80 ; done "
 ```
 Creating AKS2 ( deployed in Spoke2 ) and getting credentials from it
 ```bash
@@ -135,8 +134,7 @@ kubectl config use-context aks2
 ```
 Creating nginx deployment and exposing it via internal load balancer. Use [aks2-lb.yaml](supplementals/aks/aks2-lb.yaml) as a template.
 ```bash
-kubectl create deployment nginx --image=nginx
-kubectl scale --replicas=80 deployment/nginx
+kubectl create deployment nginx --replicas=80 --image=nginx
 
 kubectl apply -f aks2-lb.yaml 
 ```
@@ -148,14 +146,30 @@ kubernetes   ClusterIP      172.16.0.1     <none>        443/TCP        47h
 nginx        LoadBalancer   172.16.0.103   10.1.0.129    80:30074/TCP   47h  
 ```
 at this point traffic should start to flow. By looking at the `monitor` of PaloAlto VM we can count the total incoming and outbound flows. Its clearly far from 500 000 and stabilized around 170 000 in each direction.
-![PA](supplementals/palo-alto.png). Changing the number of pods or cluster nodes has no effect on that number. 
+![PA](supplementals/img/palo-alto.png). Changing the number of pods or cluster nodes or the number of pods has no effect on that number. 
 
 ## Scenario 2. VM to VM via Linux Router
 
+In the previous scenario, the total number of inbound and outbound flows is approximately 32% lower than that of the platform (320000 versus 500000). This problem may be related to Palo Alto VM size (D3_v2) or software limitations. As per the [specsheet](https://media.paloaltonetworks.com/documents/specsheet-vm-series-specsheet.pdf), VM-300 can handle 250000 sessions. 
+![General Capacities](supplementals/img/pa_specs.png)
+Let's determine how a standard Linux D3_v2 and DS4_v2 router performs. There are only two commands required to perform basic packet forwarding. `sysctl -w net.ipv4.ip_forward=1` and `sysctl -p` . 
+For more implementation details, please refer to [linux_router.tf](infrastructure/linux_router.tf). 
 
+![Topology](supplementals/img/Topology2.png)
 
+Update the routing table in route_table.tf with the updated NH and re-run Terraform apply. 
+![route_table.tf](supplementals/img/route_table.png)
 
+Ensure that target IP in wrk deployment on AKS1 match the service private IP of the AKS2.
+![deployment](supplementals/img/deployment-target.png)
+
+Linux Routers clearly outperform Palo Alto Routers in terms of performance. A total amount of flows has been created that is even bigger than the maximum number that is allowed by the platform. 
+
+![DS4_v2](supplementals/img/linuxrouterDS4_v2.png)
+
+![D3_v2](supplementals/img/linuxrouterD3_v2.png)
 
 ## Scenario 3. AKS to AKS via Linux Router
 
-## Scenario 4. AKS to NGINX
+## Scenario 4. AKS to AKS via Azure Firewall.
+## Scenario 5. AKS to NGINX

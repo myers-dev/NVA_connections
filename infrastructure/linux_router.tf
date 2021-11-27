@@ -62,7 +62,8 @@ resource "azurerm_linux_virtual_machine" "linuxrouter" {
   name                = "linuxrouter"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = "Standard_DS4_v2"
+  #size                = "Standard_DS4_v2"
+  size                = "Standard_D3_v2"
   admin_username      = data.azurerm_key_vault_secret.keyvault-username.value
   admin_password      = data.azurerm_key_vault_secret.keyvault-password.value
 
