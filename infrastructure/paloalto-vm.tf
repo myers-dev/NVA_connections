@@ -4,6 +4,10 @@
 #     plan = "bundle2"
 # }
 
+locals {
+  subnet_ids = compact([for subnet_id in module.vnet[0].vnet_subnets : trimsuffix(subnet_id, "AzureFirewallSubnet") == subnet_id ? subnet_id : ""])
+}
+
 module "PA" {
   source = "../modules/generic_vm"
 
@@ -14,7 +18,8 @@ module "PA" {
 
   name = "PA${count.index}"
 
-  subnet_ids = module.vnet[0].vnet_subnets
+  #subnet_ids = module.vnet[0].vnet_subnets
+  subnet_ids = local.subnet_ids
 
   enable_ip_forwarding = true
 

@@ -106,6 +106,8 @@ rg=`terraform output rg | tr -d "\""`
 
 subnet1=`terraform output subnet1_id | tr -d "\""`
 subnet2=`terraform output subnet2_id | tr -d "\""`
+
+vnet2_id=`terraform output vnet2_id | tr -d "\""`
 ```
 Creating AKS1 ( deployed in *Spoke1* ) and getting credentials from it
 ```bash  
@@ -127,10 +129,15 @@ Creating AKS2 ( deployed in Spoke2 ) and getting credentials from it
 az aks create --resource-group "${rg}" --name aks2 --node-count 3 --enable-addons monitoring \
 --generate-ssh-keys --vnet-subnet-id "${subnet2}" --service-cidr 172.16.0.0/24 --dns-service-ip 172.16.0.10 \
 --network-plugin azure --attach-acr acrcopernic --enable-cluster-autoscaler --min-count 1 --max-count 100
-\
+
 az aks get-credentials --name aks2 --resource-group $rg
 kubectl config get-contexts
 kubectl config use-context aks2
+```
+Role creation is necessery. [More here](https://github.com/MicrosoftLearning/AZ500-AzureSecurityTechnologies/issues/113)
+```
+aks_managed_id=$(az aks show --name aks2 --resource-group $rg --query identity.principalId -o tsv)
+az role assignment create --assignee $aks_managed_id --role "Contributor" --scope $vnet2_id
 ```
 Creating nginx deployment and exposing it via internal load balancer. Use [aks2-lb.yaml](supplementals/aks/aks2-lb.yaml) as a template.
 ```bash
@@ -148,7 +155,7 @@ nginx        LoadBalancer   172.16.0.103   10.1.0.129    80:30074/TCP   47h
 at this point traffic should start to flow. By looking at the `monitor` of PaloAlto VM we can count the total incoming and outbound flows. Its clearly far from 500 000 and stabilized around 170 000 in each direction.
 ![PA](supplementals/img/palo-alto.png). Changing the number of pods or cluster nodes or the number of pods has no effect on that number. 
 
-## Scenario 2. VM to VM via Linux Router
+## Scenario 2. AKS to AKS via Linux Router
 
 In the previous scenario, the total number of inbound and outbound flows is approximately 32% lower than that of the platform (320000 versus 500000). This problem may be related to Palo Alto VM size (D3_v2) or software limitations. As per the [specsheet](https://media.paloaltonetworks.com/documents/specsheet-vm-series-specsheet.pdf), VM-300 can handle 250000 sessions. 
 ![General Capacities](supplementals/img/pa_specs.png)
@@ -165,11 +172,15 @@ Ensure that target IP in wrk deployment on AKS1 match the service private IP of 
 
 Linux Routers clearly outperform Palo Alto Routers in terms of performance. A total amount of flows has been created that is even bigger than the maximum number that is allowed by the platform. 
 
+### [DS4_v2](https://docs.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series) flow performance:
+
 ![DS4_v2](supplementals/img/linuxrouterDS4_v2.png)
+
+### [D3_v2](https://docs.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series) flow performance:
 
 ![D3_v2](supplementals/img/linuxrouterD3_v2.png)
 
-## Scenario 3. AKS to AKS via Linux Router
+## Scenario 3. AKS to AKS via Azure Firewall.
 
-## Scenario 4. AKS to AKS via Azure Firewall.
-## Scenario 5. AKS to NGINX
+
+## Scenario 4. AKS to NGINX

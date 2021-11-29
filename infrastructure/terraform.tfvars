@@ -40,17 +40,19 @@ vnets = [
   {
     name            = "hub"
     address_space   = ["10.2.0.0/16"]
-    subnet_names    = ["default", "trusted", "untrusted"]
-    subnet_prefixes = ["10.2.0.0/24", "10.2.1.0/24", "10.2.2.0/24"]
+    subnet_names    = ["default", "trusted", "untrusted", "AzureFirewallSubnet"]
+    subnet_prefixes = ["10.2.0.0/24", "10.2.1.0/24", "10.2.2.0/24" , "10.2.3.0/24"]
     enforce_private_link_endpoint_network_policies = {
       default    = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false",
       trusted    = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false",
-      untrusted  = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false"
+      untrusted  = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false",
+      AzureFirewallSubnet  = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false"
     }
     enforce_private_link_service_network_policies = {
       default    = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false",
       trusted    = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false",
-      untrusted  = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false"
+      untrusted  = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false",
+      AzureFirewallSubnet  = true # "privateEndpointNetworkPolicies": "Disabled=true Enabled=false"
     }
   },
   {

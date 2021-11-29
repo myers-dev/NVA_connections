@@ -25,3 +25,7 @@ output "linux_router_private_ip" {
 # output "linux_router_public_ip" {
 #   value = azurerm_public_ip.linuxrouterpip.ip_address
 # }
+
+output "vnet2_id" {
+  value = module.vnet[2].vnet_id
+}
