@@ -182,5 +182,26 @@ Linux Routers clearly outperform Palo Alto Routers in terms of performance. A to
 
 ## Scenario 3. AKS to AKS via Azure Firewall.
 
+TBD. Cannot get a flow information directly from the firewall. 
+
+![Topology](supplementals/img/Topology3.png)
+
+Update the routing table in route_table.tf with the updated NH and re-run Terraform apply. 
+![route_table.tf](supplementals/img/azf_route_table.png)
 
 ## Scenario 4. AKS to NGINX
+
+In the final scenario, we will try to exhaust all ports on the DS4 node using NGINX. 
+
+![Topology](supplementals/img/Topology4.png)
+
+
+```bash
+ip=`terraform output linux_router_private_ip | tr -d "\""`
+kubectl delete deploy/wrk
+kubectl create deployment wrk --image=acrcopernic.azurecr.io/wrk:latest --replicas=240 -- bash -c "while true; do  wrk -t12 -c1200 -d3000s http://$ip:80 ; done "
+```
+
+The amount of flows are almost equal to the maximum allowed by platform.
+
+![output](supplementals/img/nginx.png)
