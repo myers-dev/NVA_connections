@@ -153,7 +153,7 @@ kubernetes   ClusterIP      172.16.0.1     <none>        443/TCP        47h
 nginx        LoadBalancer   172.16.0.103   10.1.0.129    80:30074/TCP   47h  
 ```
 at this point traffic should start to flow. By looking at the `monitor` of PaloAlto VM we can count the total incoming and outbound flows. Its clearly far from 500 000 and stabilized around 170 000 in each direction.
-![PA](supplementals/img/palo-alto.png). Changing the number of pods or cluster nodes or the number of pods has no effect on that number. 
+![PA](supplementals/img/palo-alto.png). Changing the number of cluster nodes or the number of pods has no effect on that number. 
 
 ## Scenario 2. AKS to AKS via Linux Router
 
